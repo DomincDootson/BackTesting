@@ -8,9 +8,11 @@ class BackTesting():
 		self.transaction_history = None
 	
 
-	def back_test(self, strategy : Strategy) -> None: 
-		'''Given a strategy, it will exictute it on the market data and update the transaction
-		history memeber variable.'''
+	def back_test(self, strategy : list[Strategy]) -> None: 
+		'''
+		Given a list of strategies, it will calculate the buy an cell signals for each strategy in
+		the portfolio
+		'''
 		pass
 
 		# Update the transaction history 
