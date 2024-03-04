@@ -11,6 +11,8 @@ This file contains the main code for calculating the different metrics of intere
 
 The rest of the files inherit from `Metric` and implement the different metrics. 
 
+Note these could probably just be functions, but I like the ability to name them.  
+
 ### Strategies
 This file contains the main code for different strategies we want to employ. There are two main files:
 - `StrategyName.py`: An enum that names all the different strategies that we want to implement.
@@ -18,3 +20,5 @@ This file contains the main code for different strategies we want to employ. The
 
 The rest of the files are specific examples of strategies that inherit from `Strategy`
 
+### Notes for Dominic
+- When we calculate the backtesting, I think we need to create a Ledger class to record the transactions. Where we keep a running total of the number of each stock that we have. This is what we then pass to metric in order to calculate the different 

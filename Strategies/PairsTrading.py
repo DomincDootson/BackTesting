@@ -4,12 +4,12 @@ from Strategies.StrategyName import StrategyName
 import pandas as pd 
 
 class PairsTradingStrategy(Strategy):
-    def __init__(self, stock1 : str, stock2 : str, 
+    def __init__(self, stock_pairs : tuple[str, str],
         entry_threshold : float =1.5, exit_threshold : float =0.5):
         super(PairsTradingStrategy, self).__init__(StrategyName.PAIRS_TRADING)
 
-        self.stock1 : str = stock1
-        self.stock2 : str = stock2
+        self.pairs : tuple[str,str] = stock_pairs
+        
         self.entry_threshold : float = entry_threshold
         self.exit_threshold : float = exit_threshold
 
