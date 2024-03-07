@@ -1,37 +1,65 @@
+from Ledger.Position import Position
+from collections import defaultdict
+
 import pandas as pd 
 from datetime import date
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Ledger():
 	"""
-	The ledger class will record our current positions and the cash we have liquid. Instead
-	of using a data frame and editing the values as we go (which is v. slow), we will use a 
-	dict with the keys of our stocks. 
+	The ledger class will record our current positions. Each Strategy will contain a variety of stocks 
+	that we are following, each one will have an ID. The ledger has a dict with the IDs as keys and a list
+	of the positions that we have take in that stratgy.  
 	"""
-	def __init__(self, dates : list[date], equities : list[str], starting_cash : float):
-		
-		self.dates  : list[date] = dates
-		self.ledger : dict[str, list[float]] = {eq : [0 for _ in self.dates] for eq in equities}
+	def __init__(self, starting_cash : float = 0):
+		self.ledger : dict[str, list[Position]] = defaultdict(list)
 
-		self.cash : list[float] = [0 for _ in self.dates] # Keep the cash seperate
-		self.cash[0] = starting_cash
-		
+	def __repr__(self):
+		"""Allows us to print a log of the trades"""
+		return '\n'.join([str(p) for p in self.sorted_positions()])
+			
+	def is_position_open(self, key) -> bool:
+		"""Checks to see if a position is open"""
+		if len(self.ledger[key]) == 0:
+			return False
+		return self.ledger[key][-1].is_open()
 
-	def __getitem__(self, key : tuple[str, int]) -> float:
-		'''
-		This method gets items from the ledge. Note that __getitem__ can only take one argument,
-		so to get the value we want, we must pass it a tuple that contains (stock_id, time_index)
-		'''
-		key, index = key
-		return self.ledger[key][index]
+	def close_position(self, key : str, end_date : date, stock_prices : list) -> None:
+		"""Closes a position"""
+		if key not in self.ledger:
+			raise KeyError("The key is not in the ledeger.")
+		self.ledger[key][-1].close_position(end_date, stock_prices)
 
-	def __setitem__(self, key : tuple[str, int], value : float) -> None:
-		'''
-		Same as the getter, but sets
-		'''
-		key, index = key
-		self.ledger[key][index] = value
+	def create_new_position(self, key: str, start_date : date, amount : float, stocks : list[int]) -> None:
+		"""Adds a new open position to the ledger"""
+		self.ledger[key].append(Position(key, start_date, amount, stocks))
+
+	def sorted_positions(self) -> list[Position]:
+		"""Sorts the trades we make by their start date"""
+		return sorted([p for positions in self.ledger.values() for p in positions] , key = lambda x : x.start_date)
+	
+	def get_all_returns(self) -> list[float]:
+		"""Gets the returns from all the trades"""
+		return [position.returns for position in self.sorted_positions() if position is not None]
 
 
-	def to_pandas(self) -> pd.DataFrame:
-		return pd.DataFrame(data = {**self.ledger,
-									'Cash' : self.cash}, index = self.dates)
+	## Some Metrics ##
+	## ------------ ##
+
+	def get_volatility(self) -> float:
+		return np.std(self.get_all_returns())
+
+	def get_average_returns(self) -> float:
+		return np.mean(self.get_all_returns())
+
+	def get_annualised_returns(self) -> float:
+		return 252*self.get_average_returns()
+
+	def sharpe_ratio(self, risk_free_rate = 3.5):
+		return np.sqrt(252) * (self.get_average_returns() - risk_free_rate/252)/self.get_volatility()
+
+	def print_metrics(self):
+		print(f"Annual Average Returns: {np.round(self.get_annualised_returns(),2)}%")
+		print(f"Annual Volatility: {np.round(np.sqrt(252)*self.get_volatility(),2)}%")
+		print(f"Sharpe Ratio: {np.round(self.sharpe_ratio(),2)}")

@@ -9,7 +9,7 @@ class Strategy():
 		self.name : StrategyName = strategy_name
 
 	@abstractmethod
-	def generate_signals(self, data : pd.DataFrame) -> pd.DataFrame:
+	def trade_strategy(self, data : pd.DataFrame) -> pd.DataFrame:
 		"""
 		Generate trading signals based on the specific implimentation of a strategy. Will return 
 		a data frame containing what to do at each time step 
@@ -22,3 +22,10 @@ class Strategy():
 		"""
 		pass
 
+	def check_stocks_in_data(self, data_stocks : list[str], strategy_stocks : list[str]) -> bool:
+		'''
+		Returns true if all the stocks that we for our strategy is in the data
+		'''
+		if all((s in data_stocks for s in strategy_stocks)):
+			return True
+		raise KeyError(f"The pairs trading stocks are not in the data") 
