@@ -22,7 +22,7 @@ This file contains the main code for different strategies we want to employ. The
 Up to now, the code that we have described can work with any strategy. However we are interested in testing two specific strategies. 
 
 ### Pairs Trading 
-We take the linear relationships and the pairs generated in https://github.com/DomincDootson/Pairs_Selection_with_Clustering. To implement the strategy we create a `Pair` class that holds information about each pair and implements methods of when to buy and sell. We buy when the spread is over 2 std from the mean and sell once it returns below 1 std. We obtain the following results:
+We take the linear relationships and the pairs generated in https://github.com/DomincDootson/Pairs_Selection_with_Clustering. To implement the strategy we create a `Pair` class that holds information about each pair and implements methods of when to buy and sell. We buy when the absolute value of the spread is over 2 std from the mean and sell once the absolute value returns below 1 std. We obtain the following results:
 
 - **Sharpe Ratio**: 2.04
 - **Annual Returns**: 6.21%
