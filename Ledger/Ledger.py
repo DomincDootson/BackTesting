@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import date
 import numpy as np
 import matplotlib.pyplot as plt
-
+from scipy.stats import skew, kurtosis
 class Ledger():
 	"""
 	The ledger class will record our current positions. Each Strategy will contain a variety of stocks 
@@ -53,6 +53,12 @@ class Ledger():
 	def get_average_returns(self) -> float:
 		return np.mean(self.get_all_returns())
 
+	def print_moments(self):
+		print(f"Daily Returns: {np.round(self.get_average_returns(), 3)}")
+		print(f"Volatility: {np.round(self.get_volatility(), 3)}")
+		print(f"Skew: {np.round(skew(self.get_all_returns()), 3)}")
+		print(f"kurtosis: {np.round(kurtosis(self.get_all_returns()), 3)}")
+
 	def get_annualised_returns(self) -> float:
 		return 252*self.get_average_returns()
 
@@ -63,3 +69,40 @@ class Ledger():
 		print(f"Annual Average Returns: {np.round(self.get_annualised_returns(),2)}%")
 		print(f"Annual Volatility: {np.round(np.sqrt(252)*self.get_volatility(),2)}%")
 		print(f"Sharpe Ratio: {np.round(self.sharpe_ratio(),2)}")
+
+
+	def show_returns_hist(self):
+		plt.hist(self.get_all_returns(), bins = 250, label = f"Mean: {np.round(self.get_average_returns(), 3)}\nVolatility: {np.round(self.get_volatility(), 3)}",
+		 color = 'royalblue', alpha = 0)
+		plt.hist(self.get_all_returns(), bins = 250, 
+		 color = 'royalblue')
+		plt.xlim([-.2, .4])
+		plt.legend()
+		plt.xlabel("Daily Returns")
+		plt.title("Daily Returns for Pairs Trading Strategy")
+		plt.show()
+
+	def show_n_days_dist(self):
+		fig, axs = plt.subplots(ncols = 2)
+		returns, n_days = [p.returns for p in self.sorted_positions()], [len(p) for p in self.sorted_positions()]
+
+		axs[0].hist([n for n,r in zip(n_days, returns) if r >0], bins = 25, color = 'royalblue', label = "Positive Returns")
+		axs[0].hist([n for n,r in zip(n_days, returns) if r <0], bins = 25, color = 'firebrick', alpha = 0.8, label = "Negative Returns")
+
+		axs[0].set_xlabel("Number of Days Position open")
+		axs[0].set_title("Number of Days in Position")
+
+
+		axs[1].hist([p.end_date for p in self.sorted_positions() if p.returns > 0], color = 'royalblue', bins = 100, label = "Positive Returns")
+		axs[1].hist([p.end_date for p in self.sorted_positions() if p.returns < 0], color = 'firebrick', bins = 100, label = "Negative Returns")
+		axs[1].legend()
+		axs[1].set_xlabel("Position End Date")
+		axs[1].set_title("P/L by Position End Date")
+		axs[1].set_xticklabels(axs[1].get_xticklabels(), rotation = 45)
+		plt.show()
+
+	def get_returns_excluding_final_day(self):
+		max_day = max([p.end_date for p in self.sorted_positions()])
+		returns = [p.returns for p in self.sorted_positions() if p.end_date != max_day]
+		print(np.mean(returns))
+

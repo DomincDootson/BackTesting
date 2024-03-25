@@ -1,7 +1,6 @@
 import pandas as pd
 from Ledger.Ledger import Ledger
 from Strategies.Strategy import Strategy
-from Metrics.Metric import Metric
 
 class BackTesting():
 	"""This class runs the back testing for a given data set and strategy"""
@@ -19,6 +18,3 @@ class BackTesting():
 		self.ledger = strategy.trade_strategy(self.market_data)
 	
 
-	def calculate_metric(self, metric : Metric) -> float:
-		"""Given a metric, it will return the score as calculated on the transaction history"""
-		return metric.calculate_score(self.ledger)
